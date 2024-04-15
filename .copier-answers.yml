@@ -1,0 +1,10 @@
+# Do not edit - changes here will be overwritten by Copier
+_commit: v0.2.0
+_src_path: gh:fractal-analytics-platform/fractal-tasks-template
+author_email: joel.luethi@uzh.ch
+author_name: Joel Luethi
+package_name: fractal_tasks_demo
+project_name: fractal-tasks-demo
+project_short_description: Demo package for Fractal task creation
+project_url: www.github.com/jluethi/fractal-tasks-demo
+
