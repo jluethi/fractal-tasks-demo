@@ -114,6 +114,7 @@ def thresholding_label_task(
     threshold: int,
     channel: ChannelInputModel,
     label_name: Optional[str] = None,
+    min_size: int = 50,
     overwrite: bool = True,
 ) -> None:
     """
@@ -124,6 +125,7 @@ def thresholding_label_task(
         threshold: Threshold value to be applied.
         channel: Channel to be thresholded.
         label_name: Name of the resulting label image
+        min_size: Minimum size of objects. Smaller objects are filtered out.
         overwrite: Whether to overwrite an existing label image
     """
 
@@ -155,7 +157,11 @@ def thresholding_label_task(
     logging.info(f"{array_zyx=}")
 
     # Process the image with an image processing approach of your choice
-    label_img = process_img(array_zyx.compute(), threshold=threshold)
+    label_img = process_img(
+        array_zyx.compute(),
+        threshold=threshold,
+        min_size=min_size,
+    )
 
     # Prepare label OME-Zarr
     # If the resulting label image is of lower resolution than the intensity
