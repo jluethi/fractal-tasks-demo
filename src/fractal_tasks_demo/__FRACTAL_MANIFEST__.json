@@ -1,0 +1,109 @@
+{
+  "manifest_version": "2",
+  "task_list": [
+    {
+      "name": "Thresholding Task",
+      "executable_parallel": "thresholding_task.py",
+      "meta_parallel": {
+        "cpus_per_task": 1,
+        "mem": 4000
+      },
+      "args_schema_parallel": {
+        "title": "ThresholdingTask",
+        "type": "object",
+        "properties": {
+          "zarr_url": {
+            "title": "Zarr Url",
+            "type": "string",
+            "description": "Absolute path to the OME-Zarr image."
+          },
+          "another_parameter": {
+            "title": "Another Parameter",
+            "default": 1,
+            "type": "integer",
+            "description": "An arbitrary parameter."
+          }
+        },
+        "required": [
+          "zarr_url"
+        ],
+        "additionalProperties": false
+      },
+      "docs_info": "## thresholding_task\nShort description of thresholding_task.\n\nLong description of thresholding_task.\n"
+    },
+    {
+      "name": "Thresholding Label Task",
+      "executable_parallel": "thresholding_label_task.py",
+      "meta_parallel": {
+        "cpus_per_task": 1,
+        "mem": 4000
+      },
+      "args_schema_parallel": {
+        "title": "ThresholdingLabelTask",
+        "type": "object",
+        "properties": {
+          "zarr_url": {
+            "title": "Zarr Url",
+            "type": "string",
+            "description": "Absolute path to the OME-Zarr image."
+          },
+          "threshold": {
+            "title": "Threshold",
+            "type": "integer",
+            "description": "Threshold value to be applied."
+          },
+          "channel": {
+            "$ref": "#/definitions/ChannelInputModel",
+            "title": "Channel",
+            "description": "Channel to be thresholded."
+          },
+          "label_name": {
+            "title": "Label Name",
+            "type": "string",
+            "description": "Name of the resulting label image"
+          },
+          "min_size": {
+            "title": "Min Size",
+            "default": 50,
+            "type": "integer",
+            "description": "Minimum size of objects. Smaller objects are filtered out."
+          },
+          "overwrite": {
+            "title": "Overwrite",
+            "default": true,
+            "type": "boolean",
+            "description": "Whether to overwrite an existing label image"
+          }
+        },
+        "required": [
+          "zarr_url",
+          "threshold",
+          "channel"
+        ],
+        "additionalProperties": false,
+        "definitions": {
+          "ChannelInputModel": {
+            "title": "ChannelInputModel",
+            "description": "A channel which is specified by either `wavelength_id` or `label`.",
+            "type": "object",
+            "properties": {
+              "wavelength_id": {
+                "title": "Wavelength Id",
+                "type": "string",
+                "description": "Unique ID for the channel wavelength, e.g. `A01_C01`."
+              },
+              "label": {
+                "title": "Label",
+                "type": "string",
+                "description": "Name of the channel."
+              }
+            }
+          }
+        }
+      },
+      "docs_info": "## thresholding_label_task\nThreshold an image and find connected components\n"
+    }
+  ],
+  "has_args_schemas": true,
+  "args_schema_version": "pydantic_v1"
+}
