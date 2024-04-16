@@ -26,87 +26,6 @@ from skimage.morphology import remove_small_objects
 __OME_NGFF_VERSION__ = fractal_tasks_core.__OME_NGFF_VERSION__
 
 
-def process_img(
-    int_img: np.array, threshold: int, min_size: int = 50
-) -> np.array:
-    """
-    Image processing function, to be replaced with your custom logic
-
-    Numpy image & parameters in, label image out
-
-    Args:
-        int_img: Intensity image as a numpy array
-        threshold: Thresholding value to binarize the image
-        min_size: Object size threshold for filtering
-
-    Returns:
-        label_img: np.array
-    """
-    # Thresholding the image
-    binary_img = int_img >= threshold
-
-    # Removing small objects
-    cleaned_img = remove_small_objects(binary_img, min_size=min_size)
-    # Opening to separate touching objects
-    selem = ball(1)
-    opened_img = opening(cleaned_img, selem)
-
-    # Optional: Dilation to restore object size
-    dilated_img = dilation(opened_img, selem)
-
-    # Labeling the processed image
-    label_img = label(dilated_img, connectivity=1)
-
-    return label_img
-
-
-def generate_label_attrs(
-    ngff_image_meta, label_name, downsample: int = 0
-) -> dict[str, Any]:
-    """
-    Generates the label OME-zarr attrs based on the image metadata
-
-    Args:
-        ngff_image_meta: image meta object for the corresponding NGFF image
-        label_name: name of the newly generated label
-        downsample: How many levels the label image is downsampled from the
-            ngff_image_meta image (0 for no downsampling, 1 for downsampling
-            once by the coarsening factor etc.)
-
-    Returns:
-        label_attrs: Dict of new OME-Zarr label attrs
-
-    """
-    new_datasets = rescale_datasets(
-        datasets=[
-            dataset.dict(exclude_none=True)
-            for dataset in ngff_image_meta.datasets
-        ],
-        coarsening_xy=ngff_image_meta.coarsening_xy,
-        reference_level=downsample,
-        remove_channel_axis=True,
-    )
-    label_attrs = {
-        "image-label": {
-            "version": __OME_NGFF_VERSION__,
-            "source": {"image": "../../"},
-        },
-        "multiscales": [
-            {
-                "name": label_name,
-                "version": __OME_NGFF_VERSION__,
-                "axes": [
-                    ax.dict()
-                    for ax in ngff_image_meta.multiscale.axes
-                    if ax.type != "channel"
-                ],
-                "datasets": new_datasets,
-            }
-        ],
-    }
-    return label_attrs
-
-
 @validate_arguments
 def thresholding_label_task(
     *,
@@ -195,6 +114,87 @@ def thresholding_label_task(
         coarsening_xy=ngff_image_meta.coarsening_xy,
         aggregation_function=np.max,
     )
+
+
+def process_img(
+    int_img: np.array, threshold: int, min_size: int = 50
+) -> np.array:
+    """
+    Image processing function, to be replaced with your custom logic
+
+    Numpy image & parameters in, label image out
+
+    Args:
+        int_img: Intensity image as a numpy array
+        threshold: Thresholding value to binarize the image
+        min_size: Object size threshold for filtering
+
+    Returns:
+        label_img: np.array
+    """
+    # Thresholding the image
+    binary_img = int_img >= threshold
+
+    # Removing small objects
+    cleaned_img = remove_small_objects(binary_img, min_size=min_size)
+    # Opening to separate touching objects
+    selem = ball(1)
+    opened_img = opening(cleaned_img, selem)
+
+    # Optional: Dilation to restore object size
+    dilated_img = dilation(opened_img, selem)
+
+    # Labeling the processed image
+    label_img = label(dilated_img, connectivity=1)
+
+    return label_img
+
+
+def generate_label_attrs(
+    ngff_image_meta, label_name, downsample: int = 0
+) -> dict[str, Any]:
+    """
+    Generates the label OME-zarr attrs based on the image metadata
+
+    Args:
+        ngff_image_meta: image meta object for the corresponding NGFF image
+        label_name: name of the newly generated label
+        downsample: How many levels the label image is downsampled from the
+            ngff_image_meta image (0 for no downsampling, 1 for downsampling
+            once by the coarsening factor etc.)
+
+    Returns:
+        label_attrs: Dict of new OME-Zarr label attrs
+
+    """
+    new_datasets = rescale_datasets(
+        datasets=[
+            dataset.dict(exclude_none=True)
+            for dataset in ngff_image_meta.datasets
+        ],
+        coarsening_xy=ngff_image_meta.coarsening_xy,
+        reference_level=downsample,
+        remove_channel_axis=True,
+    )
+    label_attrs = {
+        "image-label": {
+            "version": __OME_NGFF_VERSION__,
+            "source": {"image": "../../"},
+        },
+        "multiscales": [
+            {
+                "name": label_name,
+                "version": __OME_NGFF_VERSION__,
+                "axes": [
+                    ax.dict()
+                    for ax in ngff_image_meta.multiscale.axes
+                    if ax.type != "channel"
+                ],
+                "datasets": new_datasets,
+            }
+        ],
+    }
+    return label_attrs
 
 
 if __name__ == "__main__":
